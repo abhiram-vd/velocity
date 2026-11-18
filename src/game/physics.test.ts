@@ -27,7 +27,7 @@ describe('momentum physics', () => {
 describe('pattern generation', () => {
   it('keeps generated obstacles inside course bounds and leaves open lanes', () => {
     for (let id = 0; id < 30; id++) {
-      const pieces = generateSection(-100, id / 4, id, 400, 800);
+      const pieces = generateSection(-100, Math.min(3, Math.floor(id / 10)), id, 800, { playerX: 400, playerY: 650, speed: 235 });
       expect(pieces.every(o => o.x >= 0 && o.x + o.w <= 800)).toBe(true);
       expect(pieces.length).toBeGreaterThan(0);
     }

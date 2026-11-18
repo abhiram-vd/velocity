@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { GameEngine, type Snapshot } from '../game/engine';
+import { DIFFICULTY } from '../game/config';
 
 const initial: Snapshot = { status: 'playing', distance: 0, speed: 270, lives: 3, slow: 0, best: Number(localStorage.getItem('velocity-best') || 0) };
 export default function App() {
@@ -23,7 +24,7 @@ export default function App() {
     <canvas className="game-canvas" ref={canvasRef} aria-label="VELOCITY arcade game" />
     <div className="hud" aria-live="off">
       <div className="hud-distance"><strong>{Math.floor(game.distance).toLocaleString()}</strong><span>m</span></div>
-      <div className="hud-center"><span className="run-dot"/><span>{(game.speed / 270).toFixed(1)}×</span></div>
+      <div className="hud-center"><span className="run-dot"/><span>{(game.speed / DIFFICULTY.startSpeed).toFixed(1)}×</span></div>
       <div className="hud-right"><div className="life-row" aria-label={`${game.lives} lives remaining`}>{[0,1,2].map(i => <i key={i} className={i < game.lives ? 'life-dot full' : 'life-dot'} />)}</div><button className="pause-control" onClick={() => engineRef.current?.togglePause()} aria-label={game.status === 'paused' ? 'Resume' : 'Pause'}>{game.status === 'paused' ? '▶' : 'Ⅱ'}</button></div>
     </div>
     {game.slow > 0 && <div className="power-timer">SLOW <span>{game.slow.toFixed(1)}s</span></div>}
