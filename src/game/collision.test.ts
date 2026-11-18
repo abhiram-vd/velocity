@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { circlePolygon, circleRect, circleRotatedRect, collidesObstacle } from './collision';
+import {
+  circlePolygon,
+  circleRect,
+  circleRotatedRect,
+  collidesObstacle,
+  obstacleClearance,
+  qualifiesNearMiss,
+} from './collision';
 
 describe('circle to rectangle collision', () => {
   it('detects overlap including rounded corners', () => {
@@ -17,7 +24,12 @@ describe('special obstacle hitboxes', () => {
     expect(circleRotatedRect(0, 27, 2, { x: -24, y: -4, w: 48, h: 8 }, Math.PI / 2)).toBe(false);
   });
   it('checks polygon edges and interiors', () => {
-    const diamond: Array<[number,number]> = [[0,-10],[10,0],[0,10],[-10,0]];
+    const diamond: Array<[number, number]> = [
+      [0, -10],
+      [10, 0],
+      [0, 10],
+      [-10, 0],
+    ];
     expect(circlePolygon(0, 0, 1, diamond)).toBe(true);
     expect(circlePolygon(12, 12, 1, diamond)).toBe(false);
     expect(circlePolygon(10, 0, 1, diamond)).toBe(true);
@@ -30,5 +42,43 @@ describe('special obstacle hitboxes', () => {
     expect(collidesObstacle(15, 15, 4, { ...base, kind: 'rotor' })).toBe(true);
     expect(collidesObstacle(15, 15, 4, { ...base, kind: 'diamond' })).toBe(true);
     expect(collidesObstacle(60, 60, 4, { ...base, kind: 'diamond' })).toBe(false);
+  });
+});
+
+describe('near-miss clearance', () => {
+  const obstacle = {
+    id: 7,
+    x: 20,
+    y: 0,
+    w: 20,
+    h: 20,
+    kind: 'block' as const,
+    phase: 0,
+    amplitude: 0,
+    period: 1,
+    angle: 0,
+  };
+  it('measures only a narrow gap from the player collision boundary', () => {
+    expect(obstacleClearance(10, 10, 5, obstacle, 8)).toBeCloseTo(5, 1);
+    expect(obstacleClearance(15, 10, 5, obstacle, 8)).toBe(-1);
+    expect(obstacleClearance(5, 10, 5, obstacle, 6)).toBe(Infinity);
+  });
+  it('uses the rotated obstacle collider when measuring a close pass', () => {
+    const rotor = {
+      ...obstacle,
+      x: 0,
+      y: 0,
+      w: 40,
+      h: 8,
+      kind: 'rotor' as const,
+      angle: Math.PI / 2,
+    };
+    expect(obstacleClearance(32, 4, 4, rotor, 6)).toBeCloseTo(4, 1);
+  });
+  it('never rewards an encounter that contained a collision', () => {
+    expect(qualifiesNearMiss(3, false, 6)).toBe(true);
+    expect(qualifiesNearMiss(0, false, 6)).toBe(false);
+    expect(qualifiesNearMiss(3, true, 6)).toBe(false);
+    expect(qualifiesNearMiss(7, false, 6)).toBe(false);
   });
 });

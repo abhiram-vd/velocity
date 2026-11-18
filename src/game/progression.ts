@@ -5,7 +5,9 @@ export function difficultyStage(distance: number) {
   return distance < early ? 0 : distance < mid ? 1 : distance < late ? 2 : 3;
 }
 
-export function complexity(distance: number) { return Math.min(1, Math.max(0, distance / DIFFICULTY.stageDistances[2])); }
+export function complexity(distance: number) {
+  return Math.min(1, Math.max(0, distance / DIFFICULTY.stageDistances[2]));
+}
 
 export function scrollSpeed(distance: number) {
   const progress = Math.min(1, Math.max(0, distance / DIFFICULTY.speedCapDistance));
@@ -15,9 +17,13 @@ export function scrollSpeed(distance: number) {
 
 export function sectionSpacing(stage: number) {
   const progress = Math.max(0, Math.min(1, stage / 3));
-  return DIFFICULTY.sectionGapStart + (DIFFICULTY.sectionGapEnd - DIFFICULTY.sectionGapStart) * progress;
+  return (
+    DIFFICULTY.sectionGapStart + (DIFFICULTY.sectionGapEnd - DIFFICULTY.sectionGapStart) * progress
+  );
 }
 
 export function recoverySection(sectionIndex: number) {
-  return sectionIndex > 0 && sectionIndex % DIFFICULTY.recoveryEvery === DIFFICULTY.recoveryEvery - 1;
+  return (
+    sectionIndex > 0 && sectionIndex % DIFFICULTY.recoveryEvery === DIFFICULTY.recoveryEvery - 1
+  );
 }

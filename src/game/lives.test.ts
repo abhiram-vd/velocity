@@ -7,7 +7,7 @@ describe('three-life damage system', () => {
     expect(takeHit(3, 0)).toEqual({ lives: 2, invulnerable: DAMAGE_INVULNERABILITY, hit: true });
   });
   it('ignores additional hits during invulnerability and ends at zero', () => {
-    expect(takeHit(2, .5).hit).toBe(false);
+    expect(takeHit(2, 0.5).hit).toBe(false);
     expect(takeHit(1, 0)).toEqual({ lives: 0, invulnerable: DAMAGE_INVULNERABILITY, hit: true });
     expect(takeHit(0, 0).hit).toBe(false);
   });
