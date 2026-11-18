@@ -2,7 +2,7 @@ import { PHYSICS, WORLD } from './config';
 import { collidesObstacle } from './collision';
 import { recoverySection } from './progression';
 import { stepPlayer, type Player } from './physics';
-import type { Obstacle, Pickup } from './types';
+import type { Obstacle } from './types';
 
 type Build = (y: number, tier: number, seed: number, width: number) => Obstacle[];
 export type GeneratorOptions = { playerX?: number; playerVx?: number; playerY?: number; speed?: number; elapsed?: number; recentPatternIds?: number[] };
@@ -92,4 +92,3 @@ export function movingOffset(obstacle: Obstacle, elapsed: number) {
   const phase = elapsed / obstacle.period + obstacle.phase;
   return (obstacle.motion === 'sweep' ? triangle(phase) : Math.sin(elapsed * Math.PI * 2 / obstacle.period + obstacle.phase)) * obstacle.amplitude;
 }
-export function createPickup(id: number, y: number, width: number = WORLD.width): Pickup { return { id, x: width * (.16 + ((id * 29) % 68) / 100), y, type: 'slow', taken: false }; }
