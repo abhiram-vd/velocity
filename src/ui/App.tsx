@@ -10,6 +10,7 @@ import {
   UPGRADE_DESCRIPTIONS,
   UPGRADE_NAMES,
   upgradeCost,
+  upgradeGemCost,
   upgradeEffect,
 } from '../game/upgrades';
 import type { PowerUpId } from '../game/types';
@@ -20,6 +21,7 @@ import {
   CoinIcon,
   CosmeticIcon,
   HeartIcon,
+  GemIcon,
   PauseIcon,
   PlayIcon,
   PowerupIcon,
@@ -34,7 +36,9 @@ const blankSnapshot = (save: SaveData): Snapshot => ({
   speed: DIFFICULTY.startSpeed,
   lives: 3,
   runCoins: 0,
+  runGems: 0,
   balance: save.coins,
+  balanceGems: save.gems,
   bestScore: save.bestScore,
   bestDistance: save.bestDistance,
   newBest: false,
@@ -133,6 +137,10 @@ export default function App() {
                 <CoinIcon className="currency-icon" />
                 {save.coins}
               </div>
+              <div className="account-chip gem-balance">
+                <GemIcon className="currency-icon gem-icon" />
+                {save.gems}
+              </div>
               <div className="record-chip">
                 BEST <b>{save.bestScore.toLocaleString()}</b>
               </div>
@@ -176,6 +184,10 @@ export default function App() {
                 <span className="currency-count">
                   <CoinIcon className="currency-icon" />
                   {game.runCoins}
+                </span>
+                <span className="currency-count gem-count">
+                  <GemIcon className="currency-icon gem-icon" />
+                  {game.runGems}
                 </span>
                 <div className="life-row" aria-label={`${game.lives} lives remaining`}>
                   {[0, 1, 2].map((i) => (
@@ -271,6 +283,9 @@ export default function App() {
                   COINS <b className="coin-text">+{game.runCoins}</b>
                 </span>
                 <span>
+                  GEMS <b className="gem-text">+{game.runGems}</b>
+                </span>
+                <span>
                   BEST <b>{game.bestScore.toLocaleString()}</b>
                 </span>
               </div>
@@ -299,6 +314,8 @@ export default function App() {
                 <div className="balance">
                   <CoinIcon className="currency-icon" />
                   {save.coins}
+                  <GemIcon className="currency-icon gem-icon" />
+                  {save.gems}
                 </div>
               </header>
               {page === 'shop' && (
@@ -349,7 +366,8 @@ export default function App() {
                   {POWERUP_IDS.map((id) => {
                     const level = save.upgrades[id],
                       max = level >= 5,
-                      cost = upgradeCost(level);
+                      cost = upgradeCost(level),
+                      gemCost = upgradeGemCost(level);
                     return (
                       <article
                         className="upgrade-item"
@@ -379,7 +397,7 @@ export default function App() {
                         </div>
                         <button
                           className="item-action"
-                          disabled={max || save.coins < cost}
+                          disabled={max || save.coins < cost || save.gems < gemCost}
                           onClick={() => purchaseUpgrade(id)}
                         >
                           {max ? (
@@ -387,7 +405,9 @@ export default function App() {
                           ) : (
                             <>
                               <CoinIcon className="currency-icon" />
-                              {cost} · UPGRADE
+                              {cost}
+                              <GemIcon className="currency-icon gem-icon" />
+                              {gemCost} · UPGRADE
                             </>
                           )}
                         </button>

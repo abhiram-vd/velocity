@@ -7,7 +7,7 @@ export const POWERUPS: Record<PowerUpId, { label: string; glyph: string; color: 
   shield: { label: 'SHIELD', glyph: '◇', color: '#6ee7f2' },
   magnet: { label: 'MAGNET', glyph: '⌁', color: '#ed79ce' },
   multiplier: { label: '2×', glyph: '×2', color: '#ffd467' },
-  freeze: { label: 'FREEZE', glyph: '❄', color: '#8bc8ff' },
+  freeze: { label: 'INVINCIBLE', glyph: '✦', color: '#8bc8ff' },
   grip: { label: 'GRIP', glyph: '▧', color: '#a7e77c' },
 };
 const weights = [
@@ -49,6 +49,10 @@ export function powerUpInterval(stage: number) {
 export function powerUpShouldSpawn(stage: number, seed: number) {
   return randomUnit(seed + 71) < POWERUP_CONFIG.spawnChance[Math.min(3, stage)];
 }
+// Kept as a standalone helper for callers that need a temporary world pause.
+export function worldScrollSpeed(speed: number, freezeRemaining: number) {
+  return freezeRemaining > 0 ? 0 : speed;
+}
 export function findPowerUpSpot(
   seed: number,
   width: number,
@@ -79,9 +83,6 @@ export function makePowerUp(
   position: { x: number; y: number },
 ): PowerUpPickup {
   return { id, type, x: position.x, y: position.y, phase: randomUnit(id) * Math.PI * 2 };
-}
-export function worldScrollSpeed(speed: number, freezeRemaining: number) {
-  return freezeRemaining > 0 ? 0 : speed;
 }
 export function powerUpCollision(
   lives: number,

@@ -4,6 +4,7 @@ import { DEFAULT_EQUIPPED, COSMETICS, type CosmeticSlot } from './cosmetics';
 export type SaveData = {
   version: 1;
   coins: number;
+  gems: number;
   bestScore: number;
   bestDistance: number;
   upgrades: Record<PowerUpId, number>;
@@ -15,6 +16,7 @@ export const SAVE_KEY = 'velocity-save-v1';
 export const DEFAULT_SAVE: SaveData = {
   version: 1,
   coins: 0,
+  gems: 0,
   bestScore: 0,
   bestDistance: 0,
   upgrades: { shield: 0, magnet: 0, multiplier: 0, freeze: 0, grip: 0 },
@@ -63,6 +65,7 @@ export function normalizeSave(value: unknown): SaveData {
   return {
     version: 1,
     coins: nonnegative(raw.coins),
+    gems: nonnegative(raw.gems),
     bestScore: nonnegative(raw.bestScore),
     bestDistance: nonnegative(raw.bestDistance),
     upgrades: {
@@ -103,7 +106,7 @@ export function freshActivePowerUps(): ActivePowerUps {
 }
 export function bankRun(
   save: SaveData,
-  run: { coins: number; score: number; distance: number },
+  run: { coins: number; gems?: number; score: number; distance: number },
   alreadyBanked: boolean,
 ) {
   if (alreadyBanked) return { save, newBest: false, banked: false };
@@ -112,6 +115,7 @@ export function bankRun(
     save: {
       ...save,
       coins: save.coins + Math.floor(run.coins),
+      gems: save.gems + Math.floor(run.gems ?? 0),
       bestScore: Math.max(save.bestScore, Math.floor(run.score)),
       bestDistance: Math.max(save.bestDistance, Math.floor(run.distance)),
     },

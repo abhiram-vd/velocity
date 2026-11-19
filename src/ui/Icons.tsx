@@ -11,6 +11,15 @@ export function CoinIcon({ className = '' }: { className?: string }) {
   );
 }
 
+export function GemIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m6 3 12 0 4 6-10 12L2 9z" fill="currentColor" />
+      <path d="m6 3 2 6 4 12 4-12 2-6M2 9h20" fill="none" stroke="#e5fdff" strokeWidth="1.2" />
+    </svg>
+  );
+}
+
 export function HeartIcon({ active = true }: { active?: boolean }) {
   return (
     <svg className={`heart-icon${active ? ' active' : ''}`} viewBox="0 0 20 18" aria-hidden="true">
@@ -47,8 +56,8 @@ export function PowerupIcon({ id }: { id: PowerUpId }) {
       )}
       {id === 'freeze' && (
         <>
-          <path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7" />
-          <path d="m9 4 3 2 3-2M9 20l3-2 3 2M4.8 10.2l.2 3.6-3.2 1M19.2 13.8l-.2-3.6 3.2-1" />
+          <path d="m12 2 2.6 6.1L21 11l-6.4 2.9L12 20l-2.6-6.1L3 11l6.4-2.9z" />
+          <path d="M12 7v10M7 11h10" />
         </>
       )}
       {id === 'grip' && (

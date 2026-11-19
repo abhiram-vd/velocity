@@ -18,8 +18,8 @@ import {
   powerUpInterval,
   powerUpShouldSpawn,
   POWERUPS,
-  worldScrollSpeed,
   powerUpCollision,
+  randomUnit,
 } from './powerups';
 import { STARTING_LIVES } from './lives';
 import { stepPlayer, type Player } from './physics';
@@ -37,6 +37,7 @@ import type {
   Obstacle,
   PowerUpId,
   PowerUpPickup,
+  Gem,
 } from './types';
 
 type Particle = {
@@ -56,7 +57,9 @@ export type Snapshot = {
   speed: number;
   lives: number;
   runCoins: number;
+  runGems: number;
   balance: number;
+  balanceGems: number;
   bestScore: number;
   bestDistance: number;
   newBest: boolean;
@@ -163,14 +166,15 @@ function drawPowerUp(c: CanvasRenderingContext2D, p: PowerUpPickup, t: number) {
     c.stroke();
   } else if (p.type === 'freeze') {
     c.beginPath();
-    c.moveTo(-6, 0);
-    c.lineTo(6, 0);
-    c.moveTo(0, -6);
-    c.lineTo(0, 6);
-    c.moveTo(-4, -4);
-    c.lineTo(4, 4);
-    c.moveTo(4, -4);
-    c.lineTo(-4, 4);
+    c.arc(0, 0, 5, 0, Math.PI * 2);
+    c.moveTo(0, -8);
+    c.lineTo(0, -6);
+    c.moveTo(0, 6);
+    c.lineTo(0, 8);
+    c.moveTo(-8, 0);
+    c.lineTo(-6, 0);
+    c.moveTo(6, 0);
+    c.lineTo(8, 0);
     c.stroke();
   } else if (p.type === 'magnet') {
     c.beginPath();
@@ -210,6 +214,7 @@ export class GameEngine {
   obstacles: Obstacle[] = [];
   powerUps: PowerUpPickup[] = [];
   coins: Coin[] = [];
+  gems: Gem[] = [];
   particles: Particle[] = [];
   input: InputState = { left: false, right: false };
   active: ActivePowerUps = freshActivePowerUps();
@@ -221,6 +226,7 @@ export class GameEngine {
   speed: number = DIFFICULTY.startSpeed;
   lives = STARTING_LIVES;
   runCoins = 0;
+  runGems = 0;
   elapsed = 0;
   nextY = 0;
   section = 0;
@@ -274,7 +280,9 @@ export class GameEngine {
       speed: this.speed,
       lives: this.lives,
       runCoins: this.runCoins,
+      runGems: this.runGems,
       balance: this.save.coins,
+      balanceGems: this.save.gems,
       bestScore: this.save.bestScore,
       bestDistance: this.save.bestDistance,
       newBest: this.newBest,
@@ -293,6 +301,7 @@ export class GameEngine {
     this.obstacles = [];
     this.powerUps = [];
     this.coins = [];
+    this.gems = [];
     this.particles = [];
     this.active = freshActivePowerUps();
     this.nearMissEncounters.clear();
@@ -302,6 +311,7 @@ export class GameEngine {
     this.speed = DIFFICULTY.startSpeed;
     this.lives = STARTING_LIVES;
     this.runCoins = 0;
+    this.runGems = 0;
     this.elapsed = 0;
     this.damageFlash = 0;
     this.section = 0;
@@ -333,6 +343,7 @@ export class GameEngine {
     this.obstacles = [];
     this.powerUps = [];
     this.coins = [];
+    this.gems = [];
     this.particles = [];
     this.nearMissEncounters.clear();
     this.player = { x: WORLD.width / 2, vx: 0, invulnerable: 0 };
@@ -375,6 +386,13 @@ export class GameEngine {
     this.recentPatterns.push(patternId);
     this.recentPatterns = this.recentPatterns.slice(-2);
     if (id % 2 === 0) this.coins.push(...generateCoinPattern(id, WORLD.width, -210, pattern));
+    if (id % 5 === 4 && randomUnit(id * 19 + 7) < 0.72) {
+      const spot = findPowerUpSpot(id + 31, WORLD.width, -300, pattern, this.player.x, [
+        ...this.coins,
+        ...this.powerUps,
+      ]);
+      if (spot) this.gems.push({ id, ...spot, phase: randomUnit(id + 83) * Math.PI * 2 });
+    }
     return pattern;
   }
   private frame = (now: number) => {
@@ -394,7 +412,6 @@ export class GameEngine {
   };
   private update(dt: number) {
     this.elapsed += dt;
-    const freezeWasActive = this.active.freeze > 0;
     this.tickActive(dt);
     this.comboTimer = Math.max(0, this.comboTimer - dt);
     if (!this.comboTimer) this.combo = 0;
@@ -402,7 +419,7 @@ export class GameEngine {
     if (!this.eventTimer) this.event = '';
     this.speed = scrollSpeed(this.distance);
     const stage = difficultyStage(this.distance),
-      scroll = worldScrollSpeed(this.speed, this.active.freeze);
+      scroll = this.speed;
     const multiplier = this.active.multiplier > 0;
     const distanceDelta = (scroll * dt) / 10;
     this.distance += distanceDelta;
@@ -410,15 +427,18 @@ export class GameEngine {
     const gripLevel = this.save.upgrades.grip,
       brake = this.active.grip > 0 ? gripBrake(gripLevel) : 1;
     stepPlayer(this.player, this.input, dt, WORLD.width, brake);
+    if (this.active.freeze > 0)
+      this.player.invulnerable = Math.max(this.player.invulnerable, dt * 1.1);
     if (scroll > 0) {
       this.obstacles.forEach((o) => {
         o.y += scroll * dt;
         if (o.kind === 'moving') o.x = (o.baseX ?? o.x) + movingOffset(o, this.elapsed);
-        if (o.kind === 'rotor' && !freezeWasActive)
+        if (o.kind === 'rotor')
           o.angle = (o.angle + (o.angularVelocity ?? 1) * dt) % (Math.PI * 2);
       });
     }
     this.updateCoins(dt, scroll);
+    this.updateGems(dt, scroll);
     this.updatePickups(dt, scroll);
     this.checkNearMisses();
     this.checkCollision();
@@ -434,12 +454,11 @@ export class GameEngine {
       [...this.nearMissEncounters].filter(([id]) => liveObstacleIds.has(id)),
     );
     this.coins = this.coins.filter((c) => c.y < WORLD.height + 40);
+    this.gems = this.gems.filter((g) => g.y < WORLD.height + 40);
     this.powerUps = this.powerUps.filter((p) => p.y < WORLD.height + 40);
     this.checkMilestones();
     this.updateParticles(dt);
     this.emitOnTick(dt);
-    if (freezeWasActive && this.active.freeze <= 0)
-      this.burst(this.player.x, this.playerY, '#8bc8ff', 14);
   }
   private tickActive(dt: number) {
     for (const id of Object.keys(this.active) as PowerUpId[]) {
@@ -482,6 +501,21 @@ export class GameEngine {
     }
     this.coins = kept;
   }
+  private updateGems(dt: number, scroll: number) {
+    const kept: Gem[] = [];
+    for (const gem of this.gems) {
+      gem.y += scroll * dt;
+      if (Math.hypot(gem.x - this.player.x, gem.y - this.playerY) < PHYSICS.radius + 10) {
+        this.runGems++;
+        this.score += 100;
+        this.advanceCombo();
+        this.showEvent('RARE GEM +1');
+        this.burst(gem.x, gem.y, '#83f4ff', 16);
+        playSound('power', this.save.settings.sound);
+      } else kept.push(gem);
+    }
+    this.gems = kept;
+  }
   private updatePickups(dt: number, scroll: number) {
     for (const pickup of this.powerUps) {
       pickup.y += scroll * dt;
@@ -496,6 +530,7 @@ export class GameEngine {
   }
   private activate(id: PowerUpId) {
     this.active[id] = powerUpDuration(id, this.save.upgrades[id]);
+    if (id === 'freeze') this.player.invulnerable = Math.max(this.player.invulnerable, this.active.freeze);
     if (id === 'shield') this.shieldCharges = 1 + Math.floor(this.save.upgrades.shield / 3);
     this.burst(this.player.x, this.playerY, POWERUPS[id].color, 12);
     playSound('power', this.save.settings.sound);
@@ -619,7 +654,7 @@ export class GameEngine {
   private bankRun() {
     const result = bankRun(
       this.save,
-      { coins: this.runCoins, score: this.score, distance: this.distance },
+      { coins: this.runCoins, gems: this.runGems, score: this.score, distance: this.distance },
       this.runBanked,
     );
     if (!result.banked) return;
@@ -701,13 +736,6 @@ export class GameEngine {
     c.save();
     const offset = this.cameraShake.offset(Math.random, this.save.settings.screenShake);
     c.translate(offset.x, offset.y);
-    if (this.active.freeze > 0) {
-      c.fillStyle = 'rgba(120,190,255,.08)';
-      c.fillRect(0, 0, w, h);
-      c.strokeStyle = 'rgba(165,220,255,.16)';
-      c.lineWidth = 2;
-      c.strokeRect(7, 7, w - 14, h - 14);
-    }
     this.obstacles.forEach((o) => drawObstacle(c, o));
     this.coins.forEach((coin) => {
       c.save();
@@ -742,6 +770,27 @@ export class GameEngine {
       c.lineTo(1, -1);
       c.closePath();
       c.fill();
+      c.restore();
+    });
+    this.gems.forEach((gem) => {
+      c.save();
+      c.translate(gem.x, gem.y);
+      c.rotate(Math.sin(t * 2 + gem.phase) * 0.14);
+      c.shadowBlur = 22;
+      c.shadowColor = '#83f4ff';
+      c.fillStyle = '#83f4ff';
+      c.beginPath();
+      c.moveTo(0, -11);
+      c.lineTo(9, -3);
+      c.lineTo(6, 9);
+      c.lineTo(-6, 9);
+      c.lineTo(-9, -3);
+      c.closePath();
+      c.fill();
+      c.shadowBlur = 0;
+      c.strokeStyle = '#e5fdff';
+      c.lineWidth = 1.5;
+      c.stroke();
       c.restore();
     });
     this.powerUps.forEach((p) => drawPowerUp(c, p, t));
@@ -806,10 +855,13 @@ export class GameEngine {
     c.arc(0, 0, 19 + Math.sin(t * 5) * 2, 0, Math.PI * 2);
     c.stroke();
     if (this.active.freeze > 0) {
-      c.strokeStyle = 'rgba(190,230,255,.75)';
+      c.strokeStyle = 'rgba(131,244,255,.85)';
+      c.shadowBlur = 16;
+      c.shadowColor = '#83f4ff';
       c.beginPath();
-      c.arc(0, 0, 25, 0, Math.PI * 2);
+      c.arc(0, 0, 25 + Math.sin(t * 9) * 2, 0, Math.PI * 2);
       c.stroke();
+      c.shadowBlur = 0;
     }
     c.restore();
     if (this.status === 'paused' || this.status === 'over') {

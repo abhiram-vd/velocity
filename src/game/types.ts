@@ -23,5 +23,6 @@ export type Coin = {
   value: number;
   phase: number;
 };
+export type Gem = { id: number; x: number; y: number; phase: number };
 export type GameStatus = 'menu' | 'playing' | 'paused' | 'over';
 export type InputState = { left: boolean; right: boolean };

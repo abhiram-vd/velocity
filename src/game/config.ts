@@ -35,8 +35,8 @@ export const POWERUP_CONFIG = {
   magnetDurationPerLevel: 1.5,
   multiplierBaseDuration: 10,
   multiplierDurationPerLevel: 2,
-  freezeBaseDuration: 3.2,
-  freezeDurationPerLevel: 0.55,
+  invincibilityBaseDuration: 3.2,
+  invincibilityDurationPerLevel: 0.55,
   gripBaseDuration: 8,
   gripDurationPerLevel: 1.5,
   gripBrakeBase: 1.48,
@@ -44,7 +44,11 @@ export const POWERUP_CONFIG = {
   coinValue: 1,
   coinScore: 12,
 } as const;
-export const UPGRADE_CONFIG = { maxLevel: 5, costs: [8, 14, 23, 36, 54] as const } as const;
+export const UPGRADE_CONFIG = {
+  maxLevel: 5,
+  costs: [50, 120, 240, 420, 700] as const,
+  gemCosts: [1, 1, 2, 3, 5] as const,
+} as const;
 export const COLORS = {
   background: '#080b12',
   cyan: '#55d8ce',

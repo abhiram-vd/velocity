@@ -101,6 +101,16 @@ body {
   filter: drop-shadow(0 0 4px #f5c95066);
 }
 
+.gem-icon {
+  color: #83f4ff;
+  filter: drop-shadow(0 0 5px #83f4ff88);
+}
+
+.gem-text,
+.gem-count {
+  color: #83f4ff;
+}
+
 .currency-count {
   display: flex;
   align-items: center;
@@ -108,6 +118,20 @@ body {
   color: #f5efda;
   font-family: 'Press Start 2P', monospace;
   font-size: 12px;
+}
+
+.currency-count.gem-count {
+  color: #83f4ff;
+}
+
+.hud-account .currency-count {
+  gap: 3px;
+  font-size: 8px;
+}
+
+.hud-account .currency-icon {
+  width: 14px;
+  height: 14px;
 }
 
 /* Home screen */
@@ -751,6 +775,12 @@ body {
 .balance {
   font-family: 'Share Tech Mono', monospace;
   font-size: 15px;
+}
+
+.balance .currency-icon {
+  width: 15px;
+  height: 15px;
+  margin-left: 5px;
 }
 
 /* Shop */
