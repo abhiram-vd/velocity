@@ -182,6 +182,7 @@ body {
   font-family: 'Press Start 2P', monospace;
   font-size: 17px;
   box-shadow: 0 0 30px #4ce4cc22;
+  animation: logo-glow 3.2s ease-in-out infinite;
 }
 
 .logo-mark span {
@@ -191,7 +192,7 @@ body {
 }
 
 .home-core h1 {
-  margin: 20px 0 34px;
+  margin: 20px 0 8px;
   padding-left: 0;
   color: #f4f0df;
   font-family: 'Press Start 2P', monospace;
@@ -201,6 +202,15 @@ body {
   letter-spacing: 0;
   text-align: center;
   text-shadow: 0 5px 30px #000;
+}
+
+.home-tagline {
+  margin: 0 0 25px;
+  color: #8fa8a4;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-shadow: 0 0 14px #8be6d633;
 }
 
 .play-button {
@@ -219,12 +229,21 @@ body {
   cursor: pointer;
   transition:
     transform 0.15s,
-    background 0.15s;
+    background 0.15s,
+    box-shadow 0.15s;
+  box-shadow: 0 0 22px #f5d26a2b;
 }
 
 .play-button:hover {
   background: #ffe184;
+  box-shadow: 0 0 30px #f5d26a66;
   transform: translateY(-2px);
+}
+
+.play-button:active,
+.home-nav button:active,
+.quiet-button:active {
+  transform: translateY(1px) scale(0.98);
 }
 
 .play-button span {
@@ -262,6 +281,7 @@ body {
   bottom: max(24px, env(safe-area-inset-bottom));
   left: 50%;
   display: flex;
+  width: min(100% - 32px, 360px);
   gap: 8px;
   transform: translateX(-50%);
   white-space: nowrap;
@@ -270,23 +290,41 @@ body {
 .home-nav button,
 .quiet-button {
   border: 1px solid #73807c88;
-  background: #0b1119e8;
+  background: #0b1819e8;
   color: #d5ddd2;
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.02em;
   cursor: pointer;
   backdrop-filter: blur(6px);
 }
 
 .home-nav button {
-  padding: 13px 16px;
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 8px;
+  font-size: 9px;
+  transition:
+    transform 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
 }
 
 .home-nav button:hover,
 .quiet-button:hover {
   border-color: #8be6d6;
+  background-color: #112326;
   color: #8be6d6;
+  transform: translateY(-2px);
+}
+
+.play-button:focus-visible,
+.home-nav button:focus-visible,
+.quiet-button:focus-visible {
+  outline: 2px solid #8be6d6;
+  outline-offset: 3px;
 }
 
 /* Gameplay HUD */
@@ -562,7 +600,7 @@ body {
 .screen-kicker {
   color: #8ea09d;
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0;
 }
 
@@ -570,8 +608,16 @@ body {
   margin-top: 5px;
 }
 
+.pause-menu .play-button,
+.pause-menu .quiet-button {
+  width: 210px;
+  min-width: 210px;
+  height: 48px;
+  font-size: 9px;
+}
+
 .quiet-button {
-  min-width: 148px;
+  min-width: 210px;
   background: transparent;
 }
 
@@ -762,7 +808,7 @@ body {
 
 .item-info b {
   font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.6;
   letter-spacing: 0.02em;
@@ -777,7 +823,7 @@ body {
 .item-info em {
   color: var(--swatch);
   font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-size: 12px;
   font-style: normal;
   letter-spacing: 0.12em;
 }
@@ -793,7 +839,7 @@ body {
   background: #0b1218;
   color: #e8e8d8;
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
+  font-size: 12px;
   line-height: 1.5;
   letter-spacing: 0;
   cursor: pointer;
@@ -873,7 +919,7 @@ body {
 
 .upgrade-title b {
   font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.5;
 }
@@ -882,7 +928,7 @@ body {
   margin-left: auto;
   color: #c0c9c3;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .upgrade-item p {
@@ -906,7 +952,7 @@ body {
 .effect-row span {
   color: #82918b;
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.12em;
 }
 
@@ -965,7 +1011,7 @@ body {
 
 .settings-list button b {
   font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0;
 }
 
@@ -979,7 +1025,7 @@ body {
 .settings-list button strong {
   color: #f5d26a;
   font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .settings-list p {
@@ -1034,18 +1080,18 @@ body {
   }
 
   .play-button {
-    min-width: 170px;
+    min-width: 210px;
     height: 48px;
   }
 
   .home-nav {
     bottom: max(23px, env(safe-area-inset-bottom));
-    width: 100%;
+    width: calc(100% - 32px);
     justify-content: center;
   }
 
   .home-nav button {
-    padding: 10px 13px;
+    padding: 0 5px;
   }
 
   .game-hud {
@@ -1089,8 +1135,7 @@ body {
   }
 
   .home-nav button {
-    padding: 11px 10px;
-    font-size: 9px;
+    padding: 0 3px;
   }
 
   .shop-grid,
@@ -1181,13 +1226,27 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .play-button {
+  .play-button,
+  .home-nav button,
+  .quiet-button,
+  .logo-mark {
     transition: none;
+    animation: none;
   }
 
   .pause-control,
   .touch-controls button {
     backdrop-filter: none;
+  }
+}
+
+@keyframes logo-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 22px #4ce4cc1c;
+  }
+  50% {
+    box-shadow: 0 0 38px #4ce4cc55;
   }
 }
 

@@ -142,6 +142,7 @@ export default function App() {
                 V<span>·</span>
               </div>
               <h1>VELOCITY</h1>
+              <p className="home-tagline">DODGE · COLLECT · SURVIVE</p>
               <button className="play-button" onClick={play}>
                 PLAY{' '}
                 <span>
